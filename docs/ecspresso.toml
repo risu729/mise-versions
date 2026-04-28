@@ -1,4 +1,27 @@
 [versions]
+"0.0.1" = { created_at = 2017-11-06T16:19:31.000Z, release_url = "https://github.com/kayac/ecspresso/releases/tag/v0.0.1", prerelease = true }
+"0.0.2" = { created_at = 2017-11-08T08:49:57.000Z, release_url = "https://github.com/kayac/ecspresso/releases/tag/v0.0.2", prerelease = true }
+"0.1.0" = { created_at = 2017-11-09T14:40:58.000Z, release_url = "https://github.com/kayac/ecspresso/releases/tag/v0.1.0", prerelease = true }
+"0.2.0" = { created_at = 2017-11-15T16:07:32.000Z, release_url = "https://github.com/kayac/ecspresso/releases/tag/v0.2.0", prerelease = true }
+"0.2.1" = { created_at = 2017-12-01T06:23:45.000Z, release_url = "https://github.com/kayac/ecspresso/releases/tag/v0.2.1", prerelease = true }
+"0.2.2" = { created_at = 2017-12-06T15:04:19.000Z, release_url = "https://github.com/kayac/ecspresso/releases/tag/v0.2.2", prerelease = true }
+"0.3.0" = { created_at = 2017-12-14T04:28:32.000Z, release_url = "https://github.com/kayac/ecspresso/releases/tag/v0.3.0" }
+"0.3.1" = { created_at = 2017-12-26T14:49:17.000Z, release_url = "https://github.com/kayac/ecspresso/releases/tag/v0.3.1" }
+"0.3.2" = { created_at = 2017-12-28T00:52:23.000Z, release_url = "https://github.com/kayac/ecspresso/releases/tag/v0.3.2" }
+"0.3.3" = { created_at = 2018-01-18T07:05:12.000Z, release_url = "https://github.com/kayac/ecspresso/releases/tag/v0.3.3" }
+"0.3.4" = { created_at = 2018-02-27T09:23:35.000Z, release_url = "https://github.com/kayac/ecspresso/releases/tag/v0.3.4" }
+"0.3.5" = { created_at = 2018-03-14T08:46:34.000Z, release_url = "https://github.com/kayac/ecspresso/releases/tag/v0.3.5" }
+"0.3.6" = { created_at = 2018-03-16T01:33:56.000Z, release_url = "https://github.com/kayac/ecspresso/releases/tag/v0.3.6" }
+"0.4.0" = { created_at = 2018-03-30T09:44:22.000Z, release_url = "https://github.com/kayac/ecspresso/releases/tag/v0.4.0" }
+"0.5.0" = { created_at = 2018-04-05T14:17:37.000Z, release_url = "https://github.com/kayac/ecspresso/releases/tag/v0.5.0" }
+"0.5.1" = { created_at = 2018-04-11T01:40:54.000Z, release_url = "https://github.com/kayac/ecspresso/releases/tag/v0.5.1" }
+"0.6.0" = { created_at = 2018-06-13T06:33:36.000Z, release_url = "https://github.com/kayac/ecspresso/releases/tag/v0.6.0", prerelease = true }
+"0.6.1" = { created_at = 2018-06-13T08:22:11.000Z, release_url = "https://github.com/kayac/ecspresso/releases/tag/v0.6.1" }
+"0.6.2" = { created_at = 2018-06-25T08:30:58.000Z, release_url = "https://github.com/kayac/ecspresso/releases/tag/v0.6.2" }
+"0.6.3" = { created_at = 2018-08-07T05:06:33.000Z, release_url = "https://github.com/kayac/ecspresso/releases/tag/v0.6.3" }
+"0.6.4" = { created_at = 2018-09-03T16:17:06.000Z, release_url = "https://github.com/kayac/ecspresso/releases/tag/v0.6.4" }
+"0.6.5" = { created_at = 2018-11-20T03:47:50.000Z, release_url = "https://github.com/kayac/ecspresso/releases/tag/v0.6.5" }
+"0.7.0" = { created_at = 2019-03-08T13:55:21.000Z, release_url = "https://github.com/kayac/ecspresso/releases/tag/v0.7.0" }
 "0.7.1" = { created_at = 2019-05-08T05:57:32.000Z, release_url = "https://github.com/kayac/ecspresso/releases/tag/v0.7.1" }
 "0.8.0" = { created_at = 2019-06-25T08:46:24.000Z, release_url = "https://github.com/kayac/ecspresso/releases/tag/v0.8.0" }
 "0.8.1" = { created_at = 2019-06-26T13:16:57.000Z, release_url = "https://github.com/kayac/ecspresso/releases/tag/v0.8.1" }

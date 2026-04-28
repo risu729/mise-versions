@@ -2,10 +2,10 @@
 "0.4.0" = { created_at = 2020-12-11T22:19:28.000Z, release_url = "https://github.com/lycheeverse/lychee/releases/tag/v0.4.0" }
 "0.4.1" = { created_at = 2021-01-03T16:52:28.000Z, release_url = "https://github.com/lycheeverse/lychee/releases/tag/v0.4.1" }
 "0.5.0" = { created_at = 2021-01-10T00:01:11.000Z, release_url = "https://github.com/lycheeverse/lychee/releases/tag/v0.5.0" }
-"0.5.1-alpha" = { created_at = 2026-04-27T18:34:39.938Z, release_url = "https://github.com/lycheeverse/lychee/releases/tag/v0.5.1-alpha" }
-"0.6.0-alpha2" = { created_at = 2026-04-27T18:34:39.938Z, release_url = "https://github.com/lycheeverse/lychee/releases/tag/v0.6.0-alpha2" }
-"0.6.0-alpha3" = { created_at = 2026-04-27T18:34:39.938Z, release_url = "https://github.com/lycheeverse/lychee/releases/tag/v0.6.0-alpha3" }
-"0.6.0-alpha4" = { created_at = 2026-04-27T18:34:39.938Z, release_url = "https://github.com/lycheeverse/lychee/releases/tag/v0.6.0-alpha4" }
+"0.5.1-alpha" = { created_at = 2021-02-12T21:34:41.000Z, release_url = "https://github.com/lycheeverse/lychee/releases/tag/v0.5.1-alpha", prerelease = true }
+"0.6.0-alpha2" = { created_at = 2021-03-28T22:42:25.000Z, release_url = "https://github.com/lycheeverse/lychee/releases/tag/v0.6.0-alpha2", prerelease = true }
+"0.6.0-alpha3" = { created_at = 2021-03-29T21:36:29.000Z, release_url = "https://github.com/lycheeverse/lychee/releases/tag/v0.6.0-alpha3", prerelease = true }
+"0.6.0-alpha4" = { created_at = 2021-03-29T21:36:29.000Z, release_url = "https://github.com/lycheeverse/lychee/releases/tag/v0.6.0-alpha4", prerelease = true }
 "0.6.0" = { created_at = 2021-04-15T00:36:01.000Z, release_url = "https://github.com/lycheeverse/lychee/releases/tag/v0.6.0" }
 "0.7.0" = { created_at = 2021-04-17T11:41:00.000Z, release_url = "https://github.com/lycheeverse/lychee/releases/tag/0.7.0" }
 "0.7.1" = { created_at = 2021-09-03T17:35:36.000Z, release_url = "https://github.com/lycheeverse/lychee/releases/tag/v0.7.1" }
