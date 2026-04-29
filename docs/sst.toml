@@ -1245,3 +1245,4 @@
 "4.12.7" = { created_at = 2026-04-29T10:44:36.000Z, release_url = "https://github.com/sst/sst/releases/tag/v4.12.7" }
 "4.12.8" = { created_at = 2026-04-29T11:49:46.000Z, release_url = "https://github.com/sst/sst/releases/tag/v4.12.8" }
 "4.12.9" = { created_at = 2026-04-29T12:26:33.000Z, release_url = "https://github.com/sst/sst/releases/tag/v4.12.9" }
+"4.12.10" = { created_at = 2026-04-29T18:06:14.851Z }
