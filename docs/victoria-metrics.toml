@@ -409,3 +409,4 @@
 "1.136.6" = { created_at = 2026-04-27T10:57:54.000Z, release_url = "https://github.com/VictoriaMetrics/VictoriaMetrics/releases/tag/v1.136.6" }
 "1.136.7" = { created_at = 2026-04-28T11:02:21.000Z, release_url = "https://github.com/VictoriaMetrics/VictoriaMetrics/releases/tag/v1.136.7" }
 "1.142.0" = { created_at = 2026-04-28T09:56:37.000Z, release_url = "https://github.com/VictoriaMetrics/VictoriaMetrics/releases/tag/v1.142.0" }
+"1.136.8" = { created_at = 2026-04-30T17:50:48.000Z, release_url = "https://github.com/VictoriaMetrics/VictoriaMetrics/releases/tag/v1.136.8" }
