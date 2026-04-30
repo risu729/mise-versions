@@ -464,6 +464,6 @@
 "1.22.0-beta2" = { created_at = 2026-04-17T17:29:51.000Z, release_url = "https://github.com/solo-io/gloo/releases/tag/v1.22.0-beta2" }
 "1.18.36" = { created_at = 2026-04-27T21:15:15.000Z, release_url = "https://github.com/solo-io/gloo/releases/tag/v1.18.36" }
 "1.19.15" = { created_at = 2026-04-27T21:26:46.000Z, release_url = "https://github.com/solo-io/gloo/releases/tag/v1.19.15" }
-"1.20.14" = { created_at = 2026-04-30T15:36:54.775Z }
-"1.21.4" = { created_at = 2026-04-30T15:36:54.775Z }
+"1.20.14" = { created_at = 2026-04-28T16:24:39.000Z, release_url = "https://github.com/solo-io/gloo/releases/tag/v1.20.14" }
+"1.21.4" = { created_at = 2026-04-28T16:24:30.000Z, release_url = "https://github.com/solo-io/gloo/releases/tag/v1.21.4" }
 "1.22.0-beta3" = { created_at = 2026-04-29T00:11:39.000Z, release_url = "https://github.com/solo-io/gloo/releases/tag/v1.22.0-beta3" }
