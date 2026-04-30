@@ -45,3 +45,4 @@
 "0.5.7-nightly.202604250638.f53b923a" = { created_at = 2026-04-24T20:13:40.000Z, release_url = "https://github.com/entireio/cli/releases/tag/v0.5.7-nightly.202604250638.f53b923a", prerelease = true }
 "0.5.7-nightly.202604280703.51ccd662" = { created_at = 2026-04-27T23:19:39.000Z, release_url = "https://github.com/entireio/cli/releases/tag/v0.5.7-nightly.202604280703.51ccd662", prerelease = true }
 "0.5.7-nightly.202604290658.a01814a9" = { created_at = 2026-04-28T20:44:05.000Z, release_url = "https://github.com/entireio/cli/releases/tag/v0.5.7-nightly.202604290658.a01814a9", prerelease = true }
+"0.5.7-nightly.202604300701.6368942b" = { created_at = 2026-04-29T20:24:29.000Z, release_url = "https://github.com/entireio/cli/releases/tag/v0.5.7-nightly.202604300701.6368942b", prerelease = true }
