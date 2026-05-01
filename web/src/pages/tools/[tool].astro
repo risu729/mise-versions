@@ -8,17 +8,16 @@ import { DownloadsPane } from '../../components/DownloadsPane';
 import { VersionsTable } from '../../components/VersionsTable';
 import { loadToolMeta } from '../../lib/data-loader';
 
+import { env } from "cloudflare:workers";
 const { tool } = Astro.params;
 
 if (!tool) {
   return Astro.redirect('/');
 }
-
-const runtime = Astro.locals.runtime;
-const db = drizzle(runtime.env.ANALYTICS_DB);
+const db = drizzle(env.ANALYTICS_DB);
 
 // Load one tool from D1 database
-const toolMeta = await loadToolMeta(runtime.env.ANALYTICS_DB, tool);
+const toolMeta = await loadToolMeta(env.ANALYTICS_DB, tool);
 if (!toolMeta) {
   return Astro.redirect('/');
 }
@@ -53,8 +52,7 @@ let downloadStats: {
 } = { total: 0, daily: [], monthly: [], byVersion: [] };
 
 try {
-  const runtime = Astro.locals.runtime;
-  const db = drizzle(runtime.env.ANALYTICS_DB);
+  const db = drizzle(env.ANALYTICS_DB);
   const analytics = setupAnalytics(db);
   downloadStats = await analytics.getDownloadStats(tool);
 } catch (e) {

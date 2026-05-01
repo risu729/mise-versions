@@ -5,6 +5,7 @@ import { setupDatabase } from "../../../../../../src/database";
 import { jsonResponse } from "../../../../lib/api";
 import { requireAdminAuth } from "../../../../lib/admin";
 
+import { env } from "cloudflare:workers";
 interface TokenTestResult {
   id: number;
   user_name: string | null;
@@ -20,15 +21,13 @@ interface TokenTestResult {
 
 // POST /api/admin/tokens/test - Test all tokens in the pool (admin only)
 export const POST: APIRoute = async ({ request, locals }) => {
-  const runtime = locals.runtime;
-
   // Check admin auth (cookie-based)
-  const authResult = await requireAdminAuth(request, runtime.env.API_SECRET);
+  const authResult = await requireAdminAuth(request, env.API_SECRET);
   if (authResult instanceof Response) {
     return authResult;
   }
 
-  const db = drizzle(runtime.env.DB);
+  const db = drizzle(env.DB);
   const database = setupDatabase(db);
 
   // Get all active tokens (includes actual token values)

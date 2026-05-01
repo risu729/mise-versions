@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { drizzle } from "drizzle-orm/d1";
 import { sql } from "drizzle-orm";
+import { env } from "cloudflare:workers";
 import {
   jsonResponse,
   errorResponse,
@@ -28,10 +29,8 @@ interface ToolMetadata {
 
 // POST /api/admin/tools/sync - Sync tool metadata from CI
 export const POST: APIRoute = async ({ request, locals }) => {
-  const runtime = locals.runtime;
-
   // Check API auth (Bearer token for CI)
-  const authError = requireApiAuth(request, runtime.env.API_SECRET);
+  const authError = requireApiAuth(request, env.API_SECRET);
   if (authError) {
     return authError;
   }
@@ -47,7 +46,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     return errorResponse("tools must be a non-empty array", 400);
   }
 
-  const db = drizzle(runtime.env.ANALYTICS_DB);
+  const db = drizzle(env.ANALYTICS_DB);
 
   // Run migrations to ensure schema is up to date
   await runAnalyticsMigrations(db);
@@ -175,13 +174,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
         const placeholders = batch.map(() => "?").join(", ");
         // Delete from child tables first to satisfy FK constraints
         for (const table of childTables) {
-          await runtime.env.ANALYTICS_DB.prepare(
+          await env.ANALYTICS_DB.prepare(
             `DELETE FROM ${table} WHERE tool_id IN (SELECT id FROM tools WHERE name IN (${placeholders}))`,
           )
             .bind(...batch)
             .run();
         }
-        await runtime.env.ANALYTICS_DB.prepare(
+        await env.ANALYTICS_DB.prepare(
           `DELETE FROM tools WHERE name IN (${placeholders})`,
         )
           .bind(...batch)

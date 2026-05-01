@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { drizzle } from "drizzle-orm/d1";
+import { env } from "cloudflare:workers";
 import {
   getCachedVersionRows,
   getCachedText,
@@ -47,7 +48,6 @@ export const GET: APIRoute = async ({ request, params, locals }) => {
   }
 
   try {
-    const runtime = locals.runtime;
     const cached = await getCachedText(request, ":text");
     if (cached !== null) {
       return new Response(cached, {
@@ -59,10 +59,10 @@ export const GET: APIRoute = async ({ request, params, locals }) => {
       });
     }
 
-    const db = drizzle(runtime.env.ANALYTICS_DB);
+    const db = drizzle(env.ANALYTICS_DB);
     const options = { stableOnly: true };
     let versions = await getCachedVersionRows(
-      runtime.env.DOWNLOAD_DEDUPE,
+      env.DOWNLOAD_DEDUPE,
       tool,
       options,
     );
@@ -70,12 +70,7 @@ export const GET: APIRoute = async ({ request, params, locals }) => {
       versions = await loadVersionRows(db, tool, options);
       if (versions !== null) {
         runtime.ctx.waitUntil(
-          putCachedVersionRows(
-            runtime.env.DOWNLOAD_DEDUPE,
-            tool,
-            options,
-            versions,
-          ),
+          putCachedVersionRows(env.DOWNLOAD_DEDUPE, tool, options, versions),
         );
       }
     }

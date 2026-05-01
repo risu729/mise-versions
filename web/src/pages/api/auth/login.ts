@@ -1,9 +1,9 @@
 import type { APIRoute } from "astro";
 import { setOAuthStateCookie, setReturnToCookie } from "../../../lib/auth";
 
+import { env } from "cloudflare:workers";
 // GET /api/auth/login - Redirect to GitHub OAuth
 export const GET: APIRoute = async ({ request, locals, redirect }) => {
-  const runtime = locals.runtime;
   const url = new URL(request.url);
 
   const redirectUri = `${url.origin}/api/auth/callback`;
@@ -14,7 +14,7 @@ export const GET: APIRoute = async ({ request, locals, redirect }) => {
   const returnTo = url.searchParams.get("return_to") || "/";
 
   const githubAuthUrl = new URL("https://github.com/login/oauth/authorize");
-  githubAuthUrl.searchParams.set("client_id", runtime.env.GITHUB_CLIENT_ID);
+  githubAuthUrl.searchParams.set("client_id", env.GITHUB_CLIENT_ID);
   githubAuthUrl.searchParams.set("redirect_uri", redirectUri);
   githubAuthUrl.searchParams.set("scope", scope);
   githubAuthUrl.searchParams.set("state", state);

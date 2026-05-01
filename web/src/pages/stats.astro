@@ -4,6 +4,7 @@ import { drizzle } from 'drizzle-orm/d1';
 import { setupAnalytics } from '../../../src/analytics';
 import { loadToolsJson, type ToolsData } from '../lib/data-loader';
 
+import { env } from "cloudflare:workers";
 // Version updates data type (now from D1)
 interface VersionUpdatesData {
   daily: Array<{ date: string; count: number }>;
@@ -14,14 +15,13 @@ interface VersionUpdatesData {
 }
 
 // Get the D1 database from Cloudflare runtime
-const runtime = Astro.locals.runtime;
-const db = drizzle(runtime.env.ANALYTICS_DB);
+const db = drizzle(env.ANALYTICS_DB);
 const analytics = setupAnalytics(db);
 
 // Load tools from D1 database
 let toolsData: ToolsData = { tool_count: 0, tools: [] };
 try {
-  const data = await loadToolsJson(runtime.env.ANALYTICS_DB);
+  const data = await loadToolsJson(env.ANALYTICS_DB);
   if (data) {
     toolsData = data;
   }

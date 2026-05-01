@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { drizzle } from "drizzle-orm/d1";
 import { runMigrations } from "../../../../../src/migrations";
+import { env } from "cloudflare:workers";
 import {
   runAnalyticsMigrations,
   setupAnalytics,
@@ -11,11 +12,9 @@ import { jsonResponse, errorResponse } from "../../../lib/api";
 // This endpoint handles the daily aggregation tasks
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
-    const runtime = locals.runtime;
-
     // Verify admin secret
     const authHeader = request.headers.get("Authorization");
-    const expectedAuth = `Bearer ${runtime.env.API_SECRET}`;
+    const expectedAuth = `Bearer ${env.API_SECRET}`;
     if (authHeader !== expectedAuth) {
       return errorResponse("Unauthorized", 401);
     }
@@ -23,10 +22,10 @@ export const POST: APIRoute = async ({ request, locals }) => {
     console.log("Running scheduled tasks...");
 
     // Run migrations first
-    const db = drizzle(runtime.env.DB);
+    const db = drizzle(env.DB);
     await runMigrations(db);
 
-    const analyticsDb = drizzle(runtime.env.ANALYTICS_DB);
+    const analyticsDb = drizzle(env.ANALYTICS_DB);
     await runAnalyticsMigrations(analyticsDb);
 
     const analytics = setupAnalytics(analyticsDb);
@@ -47,7 +46,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     // Populate yesterday's full data
     const yesterdayResult = await analytics.populateRollupTables(
       yesterdayStr,
-      runtime.env.ANALYTICS_DB,
+      env.ANALYTICS_DB,
     );
     console.log(
       `Rollup tables populated for ${yesterdayStr}: ${yesterdayResult.toolStats} tools, ${yesterdayResult.backendStats} backends`,
@@ -56,7 +55,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     // Also update today's partial data
     const todayResult = await analytics.populateRollupTables(
       todayStr,
-      runtime.env.ANALYTICS_DB,
+      env.ANALYTICS_DB,
     );
     console.log(
       `Rollup tables updated for ${todayStr}: ${todayResult.toolStats} tools, ${todayResult.backendStats} backends`,
@@ -65,7 +64,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     // 3. Populate version stats rollup for DAU/MAU
     const yesterdayVersionStats = await analytics.populateVersionStatsRollup(
       yesterdayStr,
-      runtime.env.ANALYTICS_DB,
+      env.ANALYTICS_DB,
     );
     console.log(
       `Version stats rollup for ${yesterdayStr}: ${yesterdayVersionStats ? "updated" : "no data"}`,
@@ -73,7 +72,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     const todayVersionStats = await analytics.populateVersionStatsRollup(
       todayStr,
-      runtime.env.ANALYTICS_DB,
+      env.ANALYTICS_DB,
     );
     console.log(
       `Version stats rollup for ${todayStr}: ${todayVersionStats ? "updated" : "no data"}`,
@@ -88,7 +87,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       const dateStr = d.toISOString().split("T")[0];
       const result = await analytics.populateDailyMauStats(
         dateStr,
-        runtime.env.ANALYTICS_DB,
+        env.ANALYTICS_DB,
       );
       if (result) mauDaysUpdated++;
     }

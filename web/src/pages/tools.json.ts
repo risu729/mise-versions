@@ -1,11 +1,11 @@
 import type { APIRoute } from "astro";
 import { loadToolsJson } from "../lib/data-loader";
 
+import { env } from "cloudflare:workers";
 // Legacy endpoint: GET /tools.json - serves tools manifest from D1
 export const GET: APIRoute = async ({ locals }) => {
   try {
-    const runtime = locals.runtime;
-    const toolsData = await loadToolsJson(runtime.env.ANALYTICS_DB);
+    const toolsData = await loadToolsJson(env.ANALYTICS_DB);
 
     if (!toolsData) {
       return new Response("tools.json not found", {

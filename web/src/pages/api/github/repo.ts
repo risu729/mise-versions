@@ -5,6 +5,7 @@ import { setupDatabase } from "../../../../../src/database";
 import { getAuthCookie } from "../../../lib/auth";
 import { jsonResponse, errorResponse } from "../../../lib/api";
 
+import { env } from "cloudflare:workers";
 // Cache freshness threshold (6 hours in milliseconds)
 const GITHUB_CACHE_FRESH_MS = 6 * 60 * 60 * 1000;
 // Cache TTL for KV storage (30 days - we manage freshness ourselves)
@@ -31,7 +32,6 @@ interface CachedRepoInfo {
 
 // GET /api/github/repo - Get GitHub repo info (cached, serves stale to unauthenticated)
 export const GET: APIRoute = async ({ request, locals }) => {
-  const runtime = locals.runtime;
   const url = new URL(request.url);
   const owner = url.searchParams.get("owner");
   const repo = url.searchParams.get("repo");
@@ -41,10 +41,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
   }
 
   const cacheKey = `github:${owner}/${repo}`;
-  const cached = await runtime.env.GITHUB_CACHE.get<CachedRepoInfo>(
-    cacheKey,
-    "json",
-  );
+  const cached = await env.GITHUB_CACHE.get<CachedRepoInfo>(cacheKey, "json");
   const now = Date.now();
   const isFresh = cached && now - cached.cached_at < GITHUB_CACHE_FRESH_MS;
 
@@ -54,7 +51,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
   }
 
   // Check authentication
-  const auth = await getAuthCookie(request, runtime.env.API_SECRET);
+  const auth = await getAuthCookie(request, env.API_SECRET);
 
   // If cache exists but stale, and user is NOT authenticated, serve stale data with warning
   if (cached && !auth) {
@@ -67,7 +64,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
   }
 
   // User is authenticated - try to refresh the cache
-  const db = drizzle(runtime.env.DB);
+  const db = drizzle(env.DB);
   const database = setupDatabase(db);
   const tokenRecord = await database.getTokenByUserId(auth!.username);
 
@@ -103,7 +100,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
     };
 
     // Cache for 30 days (we manage freshness via cached_at)
-    await runtime.env.GITHUB_CACHE.put(cacheKey, JSON.stringify(repoInfo), {
+    await env.GITHUB_CACHE.put(cacheKey, JSON.stringify(repoInfo), {
       expirationTtl: GITHUB_CACHE_TTL_SECONDS,
     });
 

@@ -4,17 +4,16 @@ import { Octokit } from "@octokit/rest";
 import { setupDatabase } from "../../../../../src/database";
 import { jsonResponse, errorResponse, requireApiAuth } from "../../../lib/api";
 
+import { env } from "cloudflare:workers";
 const MIN_RATE_LIMIT = 1000;
 
 // GET /api/token - Get next available token (for update workflow)
 export const GET: APIRoute = async ({ request, locals }) => {
-  const runtime = locals.runtime;
-
   // Require API auth
-  const authError = requireApiAuth(request, runtime.env.API_SECRET);
+  const authError = requireApiAuth(request, env.API_SECRET);
   if (authError) return authError;
 
-  const db = drizzle(runtime.env.DB);
+  const db = drizzle(env.DB);
   const database = setupDatabase(db);
 
   // Clean up expired tokens

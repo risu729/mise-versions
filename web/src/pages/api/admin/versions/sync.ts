@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { drizzle } from "drizzle-orm/d1";
 import { sql } from "drizzle-orm";
+import { env } from "cloudflare:workers";
 import {
   jsonResponse,
   errorResponse,
@@ -28,10 +29,8 @@ const BATCH_SIZE = 100; // D1 batch limit
 
 // POST /api/admin/versions/sync - Sync tool versions from CI
 export const POST: APIRoute = async ({ request, locals }) => {
-  const runtime = locals.runtime;
-
   // Check API auth (Bearer token for CI)
-  const authError = requireApiAuth(request, runtime.env.API_SECRET);
+  const authError = requireApiAuth(request, env.API_SECRET);
   if (authError) {
     return authError;
   }
@@ -43,7 +42,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     return errorResponse("Invalid JSON body", 400);
   }
 
-  const d1 = runtime.env.ANALYTICS_DB;
+  const d1 = env.ANALYTICS_DB;
   const db = drizzle(d1);
   const analytics = setupAnalytics(db);
 

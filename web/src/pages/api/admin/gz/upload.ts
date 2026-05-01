@@ -1,4 +1,5 @@
 import type { APIRoute } from "astro";
+import { env } from "cloudflare:workers";
 import {
   jsonResponse,
   errorResponse,
@@ -12,10 +13,8 @@ interface UploadRequest {
 
 // POST /api/admin/gz/upload - Upload .gz file to R2
 export const POST: APIRoute = async ({ request, locals }) => {
-  const runtime = locals.runtime;
-
   // Check API auth (Bearer token for CI)
-  const authError = requireApiAuth(request, runtime.env.API_SECRET);
+  const authError = requireApiAuth(request, env.API_SECRET);
   if (authError) {
     return authError;
   }
@@ -44,7 +43,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const binaryData = Uint8Array.from(atob(body.data), (c) => c.charCodeAt(0));
 
     // Upload to R2 bucket under tools/ prefix
-    const bucket = runtime.env.DATA_BUCKET;
+    const bucket = env.DATA_BUCKET;
     const key = `tools/${body.filename}`;
 
     await bucket.put(key, binaryData, {

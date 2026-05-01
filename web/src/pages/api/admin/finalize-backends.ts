@@ -3,19 +3,18 @@ import { drizzle } from "drizzle-orm/d1";
 import { setupAnalytics } from "../../../../../src/analytics";
 import { jsonResponse, errorResponse } from "../../../lib/api";
 
+import { env } from "cloudflare:workers";
 // POST /api/admin/finalize-backends - Make backend_id NOT NULL (requires auth)
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
-    const runtime = locals.runtime;
-
     // Verify admin secret
     const authHeader = request.headers.get("Authorization");
-    const expectedAuth = `Bearer ${runtime.env.API_SECRET}`;
+    const expectedAuth = `Bearer ${env.API_SECRET}`;
     if (authHeader !== expectedAuth) {
       return errorResponse("Unauthorized", 401);
     }
 
-    const db = drizzle(runtime.env.ANALYTICS_DB);
+    const db = drizzle(env.ANALYTICS_DB);
     const analytics = setupAnalytics(db);
 
     await analytics.makeBackendIdNotNull();

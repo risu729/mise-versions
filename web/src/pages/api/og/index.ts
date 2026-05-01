@@ -4,6 +4,7 @@ import { drizzle } from "drizzle-orm/d1";
 import { setupAnalytics } from "../../../../../src/analytics";
 import { loadToolsJson } from "../../../lib/data-loader";
 
+import { env } from "cloudflare:workers";
 interface TrendingTool {
   name: string;
   downloads_30d: number;
@@ -111,19 +112,17 @@ function generateToolCard(tool: TrendingTool, index: number): string {
 
 // GET /api/og - Generate OG image for homepage with Hot Tools
 export const GET: APIRoute = async ({ locals }) => {
-  const runtime = locals.runtime;
-
   let trendingTools: TrendingTool[] = [];
   let toolCount = 960;
 
   try {
-    const db = drizzle(runtime.env.ANALYTICS_DB);
+    const db = drizzle(env.ANALYTICS_DB);
     const analytics = setupAnalytics(db);
 
     // Fetch trending tools and tool metadata in parallel
     const [trending, toolsData] = await Promise.all([
       analytics.getTrendingTools(6),
-      loadToolsJson(runtime.env.ANALYTICS_DB),
+      loadToolsJson(env.ANALYTICS_DB),
     ]);
 
     if (toolsData) {

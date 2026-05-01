@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { getFromR2 } from "../lib/r2-data";
 
+import { env } from "cloudflare:workers";
 // Legacy endpoint: GET /:tool.gz - serves gzip compressed files from R2
 // e.g., /python-precompiled-x86_64-unknown-linux-gnu.gz
 export const GET: APIRoute = async ({ params, locals }) => {
@@ -24,8 +25,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
   }
 
   try {
-    const runtime = locals.runtime;
-    const bucket = runtime.env.DATA_BUCKET;
+    const bucket = env.DATA_BUCKET;
 
     // Fetch gzip file from R2 (stored under tools/ prefix)
     const data = await getFromR2(bucket, `tools/${fullName}`);

@@ -5,16 +5,16 @@ import { getAuthCookie } from "../../../lib/auth";
 import { jsonResponse, errorResponse } from "../../../lib/api";
 import { isAdmin } from "../../../lib/admin";
 
+import { env } from "cloudflare:workers";
 // GET /api/admin/table-counts - Get row counts for all D1 tables
 export const GET: APIRoute = async ({ request, locals }) => {
-  const runtime = locals.runtime;
-  const auth = await getAuthCookie(request, runtime.env.API_SECRET);
+  const auth = await getAuthCookie(request, env.API_SECRET);
 
   if (!auth || !isAdmin(auth.username)) {
     return errorResponse("Unauthorized", 401);
   }
 
-  const db = drizzle(runtime.env.ANALYTICS_DB);
+  const db = drizzle(env.ANALYTICS_DB);
 
   // Dynamically discover all tables from sqlite_master
   const tablesResult = await db.all<{ name: string }>(

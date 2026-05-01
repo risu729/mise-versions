@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import { drizzle } from "drizzle-orm/d1";
 import { hashIP, getClientIP } from "../lib/hash";
 import { setupAnalytics } from "../../../src/analytics";
+import { env } from "cloudflare:workers";
 import {
   emitTelemetry,
   getMiseVersionFromHeaders,
@@ -36,25 +37,16 @@ export const GET: APIRoute = async ({ request, params, locals }) => {
   }
 
   try {
-    const runtime = locals.runtime;
-    const db = drizzle(runtime.env.ANALYTICS_DB);
+    const db = drizzle(env.ANALYTICS_DB);
 
     let toml = await getCachedText(request, ":toml");
     if (toml === null) {
-      let versions = await getCachedVersionRows(
-        runtime.env.DOWNLOAD_DEDUPE,
-        tool,
-      );
+      let versions = await getCachedVersionRows(env.DOWNLOAD_DEDUPE, tool);
       if (versions === null) {
         versions = await loadVersionRows(db, tool);
         if (versions !== null) {
           runtime.ctx.waitUntil(
-            putCachedVersionRows(
-              runtime.env.DOWNLOAD_DEDUPE,
-              tool,
-              {},
-              versions,
-            ),
+            putCachedVersionRows(env.DOWNLOAD_DEDUPE, tool, {}, versions),
           );
         }
       }
@@ -75,10 +67,10 @@ export const GET: APIRoute = async ({ request, params, locals }) => {
     const miseVersion = getMiseVersionFromHeaders(request.headers);
     const isCI = request.headers.get("x-mise-ci") === "true";
     runtime.ctx.waitUntil(
-      hashIP(clientIP, runtime.env.API_SECRET).then(async (ipHash) => {
+      hashIP(clientIP, env.API_SECRET).then(async (ipHash) => {
         try {
           // Always emit telemetry (includes is_ci flag for analysis)
-          await emitTelemetry(runtime.env, {
+          await emitTelemetry(env, {
             schema_version: 1,
             type: "version_request",
             ts: Date.now(),
@@ -91,7 +83,7 @@ export const GET: APIRoute = async ({ request, params, locals }) => {
           // Skip database storage for CI requests (excludes from MAU calculations)
           if (!isCI) {
             const analytics = setupAnalytics(db, {
-              trackingCache: runtime.env.DOWNLOAD_DEDUPE,
+              trackingCache: env.DOWNLOAD_DEDUPE,
             });
             await analytics.trackVersionRequest(ipHash);
           }

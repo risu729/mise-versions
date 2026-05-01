@@ -4,12 +4,11 @@ import { setupDatabase } from "../../../../../../src/database";
 import { jsonResponse, errorResponse } from "../../../../lib/api";
 import { requireAdminAuth } from "../../../../lib/admin";
 
+import { env } from "cloudflare:workers";
 // POST /api/admin/tokens/delete-batch - Delete multiple tokens by IDs (admin only)
 export const POST: APIRoute = async ({ request, locals }) => {
-  const runtime = locals.runtime;
-
   // Check admin auth (cookie-based)
-  const authResult = await requireAdminAuth(request, runtime.env.API_SECRET);
+  const authResult = await requireAdminAuth(request, env.API_SECRET);
   if (authResult instanceof Response) {
     return authResult;
   }
@@ -25,7 +24,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     return errorResponse("ids must be a non-empty array", 400);
   }
 
-  const db = drizzle(runtime.env.DB);
+  const db = drizzle(env.DB);
   const database = setupDatabase(db);
 
   const result = await database.deleteTokens(body.ids);

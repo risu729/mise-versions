@@ -3,14 +3,13 @@ import { drizzle } from "drizzle-orm/d1";
 import { setupAnalytics } from "../../../../../src/analytics";
 import { jsonResponse, errorResponse } from "../../../lib/api";
 
+import { env } from "cloudflare:workers";
 // POST /api/admin/backfill-backends - Backfill backend_id using registry data (requires auth)
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
-    const runtime = locals.runtime;
-
     // Verify admin secret
     const authHeader = request.headers.get("Authorization");
-    const expectedAuth = `Bearer ${runtime.env.API_SECRET}`;
+    const expectedAuth = `Bearer ${env.API_SECRET}`;
     if (authHeader !== expectedAuth) {
       return errorResponse("Unauthorized", 401);
     }
@@ -23,13 +22,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
       return errorResponse("Missing or invalid registry data", 400);
     }
 
-    const db = drizzle(runtime.env.ANALYTICS_DB);
+    const db = drizzle(env.ANALYTICS_DB);
     const analytics = setupAnalytics(db);
 
     // Pass D1 directly for raw operations
     const result = await analytics.backfillBackends(
       body.registry,
-      runtime.env.ANALYTICS_DB,
+      env.ANALYTICS_DB,
     );
 
     return jsonResponse({

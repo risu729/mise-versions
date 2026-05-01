@@ -3,9 +3,9 @@ import Layout from '../layouts/Layout.astro';
 import { getAuthCookie } from '../lib/auth';
 import { isAdmin } from '../lib/admin';
 
+import { env } from "cloudflare:workers";
 // Server-side admin check
-const runtime = Astro.locals.runtime;
-const auth = await getAuthCookie(Astro.request, runtime.env.API_SECRET);
+const auth = await getAuthCookie(Astro.request, env.API_SECRET);
 
 if (!auth || !isAdmin(auth.username)) {
   return Astro.redirect('/');

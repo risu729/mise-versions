@@ -4,6 +4,7 @@ import { sql } from "drizzle-orm";
 import { jsonResponse, errorResponse } from "../../../lib/api";
 import { requireAdminAuth } from "../../../lib/admin";
 
+import { env } from "cloudflare:workers";
 interface AsdfPrimaryTool {
   name: string;
   downloads_30d: number;
@@ -12,15 +13,13 @@ interface AsdfPrimaryTool {
 
 // GET /api/admin/asdf-primary - Get asdf-primary tools ranked by download count
 export const GET: APIRoute = async ({ request, locals }) => {
-  const runtime = locals.runtime;
-
   // Check admin auth (cookie-based)
-  const authResult = await requireAdminAuth(request, runtime.env.API_SECRET);
+  const authResult = await requireAdminAuth(request, env.API_SECRET);
   if (authResult instanceof Response) {
     return authResult;
   }
 
-  const db = drizzle(runtime.env.ANALYTICS_DB);
+  const db = drizzle(env.ANALYTICS_DB);
 
   try {
     // Get all tools with their backends and 30-day download counts

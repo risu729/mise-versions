@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { loadToolsPaginated } from "../../../lib/data-loader";
+import { env } from "cloudflare:workers";
 import {
   getCachedJson,
   putCachedJson,
@@ -10,9 +11,8 @@ const TOOLS_CACHE_TTL_SECONDS = 300;
 
 export const GET: APIRoute = async ({ url, locals }) => {
   try {
-    const runtime = locals.runtime;
     const cacheKey = await requestCacheKey("api-tools", url);
-    const cached = await getCachedJson(runtime.env.DOWNLOAD_DEDUPE, cacheKey);
+    const cached = await getCachedJson(env.DOWNLOAD_DEDUPE, cacheKey);
     if (cached) {
       return new Response(JSON.stringify(cached), {
         status: 200,
@@ -43,7 +43,7 @@ export const GET: APIRoute = async ({ url, locals }) => {
     const validPage = Math.max(1, page);
     const validLimit = Math.min(100, Math.max(1, limit));
 
-    const result = await loadToolsPaginated(runtime.env.ANALYTICS_DB, {
+    const result = await loadToolsPaginated(env.ANALYTICS_DB, {
       page: validPage,
       limit: validLimit,
       search,
@@ -52,7 +52,7 @@ export const GET: APIRoute = async ({ url, locals }) => {
     });
     runtime.ctx.waitUntil(
       putCachedJson(
-        runtime.env.DOWNLOAD_DEDUPE,
+        env.DOWNLOAD_DEDUPE,
         cacheKey,
         result,
         TOOLS_CACHE_TTL_SECONDS,

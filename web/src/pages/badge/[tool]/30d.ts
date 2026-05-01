@@ -3,13 +3,13 @@ import { drizzle } from "drizzle-orm/d1";
 import { setupAnalytics } from "../../../../../src/analytics";
 import { formatCount, generateBadgeSvg, svgResponse } from "../../../lib/badge";
 
+import { env } from "cloudflare:workers";
 // GET /badge/:tool/30d - 30-day downloads badge
 export const GET: APIRoute = async ({ params, locals }) => {
   const tool = params.tool!;
 
   try {
-    const runtime = locals.runtime;
-    const db = drizzle(runtime.env.ANALYTICS_DB);
+    const db = drizzle(env.ANALYTICS_DB);
     const analytics = setupAnalytics(db);
 
     const counts = await analytics.getAll30DayDownloads();

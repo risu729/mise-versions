@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { drizzle } from "drizzle-orm/d1";
 import { setupAnalytics } from "../../../../../../src/analytics";
+import { env } from "cloudflare:workers";
 import {
   getCachedJson,
   putCachedJson,
@@ -23,9 +24,8 @@ export const GET: APIRoute = async ({ params, request, locals }) => {
   const days = parseInt(url.searchParams.get("days") || "30", 10);
 
   try {
-    const runtime = locals.runtime;
     const cacheKey = await requestCacheKey("version-trends", request);
-    const cached = await getCachedJson(runtime.env.DOWNLOAD_DEDUPE, cacheKey);
+    const cached = await getCachedJson(env.DOWNLOAD_DEDUPE, cacheKey);
     if (cached) {
       return new Response(JSON.stringify(cached), {
         status: 200,
@@ -36,13 +36,13 @@ export const GET: APIRoute = async ({ params, request, locals }) => {
       });
     }
 
-    const db = drizzle(runtime.env.ANALYTICS_DB);
+    const db = drizzle(env.ANALYTICS_DB);
     const analytics = setupAnalytics(db);
 
     const data = await analytics.getVersionTrends(tool, days);
     runtime.ctx.waitUntil(
       putCachedJson(
-        runtime.env.DOWNLOAD_DEDUPE,
+        env.DOWNLOAD_DEDUPE,
         cacheKey,
         data,
         VERSION_TRENDS_CACHE_TTL_SECONDS,

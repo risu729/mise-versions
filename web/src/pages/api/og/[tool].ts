@@ -4,6 +4,7 @@ import { drizzle } from "drizzle-orm/d1";
 import { setupAnalytics } from "../../../../../src/analytics";
 import { loadToolsJson, type ToolMeta } from "../../../lib/data-loader";
 
+import { env } from "cloudflare:workers";
 interface OGToolMeta {
   name: string;
   description?: string;
@@ -101,14 +102,13 @@ function generateImage(
 // GET /api/og/:tool - Generate OG image for a tool
 export const GET: APIRoute = async ({ params, locals }) => {
   const toolName = params.tool!;
-  const runtime = locals.runtime;
 
   // Fetch tool meta and downloads in parallel
   const [toolsData, downloads] = await Promise.all([
-    loadToolsJson(runtime.env.ANALYTICS_DB),
+    loadToolsJson(env.ANALYTICS_DB),
     (async () => {
       try {
-        const db = drizzle(runtime.env.ANALYTICS_DB);
+        const db = drizzle(env.ANALYTICS_DB);
         const analytics = setupAnalytics(db);
         const stats = await analytics.getDownloadStats(toolName);
         return stats.total || null;

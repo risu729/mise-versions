@@ -3,15 +3,14 @@ import { drizzle } from "drizzle-orm/d1";
 import { setupDatabase } from "../../../../../src/database";
 import { requireApiAuth, CORS_HEADERS } from "../../../lib/api";
 
+import { env } from "cloudflare:workers";
 // POST /api/token/rate-limit - Mark a token as rate-limited
 export const POST: APIRoute = async ({ request, locals }) => {
-  const runtime = locals.runtime;
-
   // Require API auth
-  const authError = requireApiAuth(request, runtime.env.API_SECRET);
+  const authError = requireApiAuth(request, env.API_SECRET);
   if (authError) return authError;
 
-  const db = drizzle(runtime.env.DB);
+  const db = drizzle(env.DB);
   const database = setupDatabase(db);
 
   const rateLimitData = (await request.json()) as {

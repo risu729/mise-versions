@@ -5,7 +5,7 @@ import { drizzle } from 'drizzle-orm/d1';
 import { setupAnalytics } from '../../../src/analytics';
 import { loadToolsPaginated, type PaginatedToolsResult } from '../lib/data-loader';
 
-const runtime = Astro.locals.runtime;
+import { env } from "cloudflare:workers";
 const url = Astro.url;
 
 // Parse URL params for initial state
@@ -29,7 +29,7 @@ let toolsData: PaginatedToolsResult = {
   backendCounts: {},
 };
 try {
-  toolsData = await loadToolsPaginated(runtime.env.ANALYTICS_DB, {
+  toolsData = await loadToolsPaginated(env.ANALYTICS_DB, {
     page,
     limit: 50,
     search,
@@ -53,7 +53,7 @@ let trendingTools: Array<{
   version_count?: number;
 }> = [];
 try {
-  const db = drizzle(runtime.env.ANALYTICS_DB);
+  const db = drizzle(env.ANALYTICS_DB);
   const analytics = setupAnalytics(db);
   trendingTools = await analytics.getTrendingTools(6);
 } catch (e) {

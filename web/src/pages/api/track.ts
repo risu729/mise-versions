@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import { drizzle } from "drizzle-orm/d1";
 import { setupAnalytics } from "../../../../src/analytics";
 import { hashIP, getClientIP } from "../../lib/hash";
+import { env } from "cloudflare:workers";
 import {
   emitTelemetry,
   getMiseVersionFromHeaders,
@@ -38,10 +39,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
         },
       );
     }
-
-    const runtime = locals.runtime;
     const clientIP = getClientIP(request);
-    const ipHash = await hashIP(clientIP, runtime.env.API_SECRET);
+    const ipHash = await hashIP(clientIP, env.API_SECRET);
 
     // Check if request is from CI environment
     const isCI = request.headers.get("x-mise-ci") === "true";
@@ -50,7 +49,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     // Always emit telemetry (includes is_ci flag for analysis)
     runtime.ctx.waitUntil(
-      emitTelemetry(runtime.env, {
+      emitTelemetry(env, {
         schema_version: 1,
         type: "download",
         ts: Date.now(),
@@ -81,13 +80,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
       );
     }
 
-    const db = drizzle(runtime.env.ANALYTICS_DB);
+    const db = drizzle(env.ANALYTICS_DB);
     const analytics = setupAnalytics(db, {
-      trackingCache: runtime.env.DOWNLOAD_DEDUPE,
+      trackingCache: env.DOWNLOAD_DEDUPE,
     });
     const dedupeKey = downloadDedupeKey(body.tool, body.version, ipHash);
 
-    const seen = await runtime.env.DOWNLOAD_DEDUPE.get(dedupeKey);
+    const seen = await env.DOWNLOAD_DEDUPE.get(dedupeKey);
     if (seen) {
       return new Response(
         JSON.stringify({
@@ -101,7 +100,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       );
     }
 
-    await runtime.env.DOWNLOAD_DEDUPE.put(dedupeKey, "1", {
+    await env.DOWNLOAD_DEDUPE.put(dedupeKey, "1", {
       expirationTtl: DOWNLOAD_DEDUPE_TTL_SECONDS,
     });
 

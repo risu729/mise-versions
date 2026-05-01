@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import { drizzle } from "drizzle-orm/d1";
 import { setupAnalytics } from "../../../../../../src/analytics";
 
+import { env } from "cloudflare:workers";
 export const GET: APIRoute = async ({ params, locals }) => {
   try {
     const { tool } = params;
@@ -11,9 +12,7 @@ export const GET: APIRoute = async ({ params, locals }) => {
         headers: { "Content-Type": "application/json" },
       });
     }
-
-    const runtime = locals.runtime;
-    const db = drizzle(runtime.env.ANALYTICS_DB);
+    const db = drizzle(env.ANALYTICS_DB);
     const analytics = setupAnalytics(db);
 
     const stats = await analytics.getToolGrowth(tool);

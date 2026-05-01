@@ -3,6 +3,7 @@ import { createOAuthUserAuth } from "@octokit/auth-oauth-user";
 import { Octokit } from "@octokit/rest";
 import { drizzle } from "drizzle-orm/d1";
 import { setupDatabase } from "../../../../../src/database";
+import { env } from "cloudflare:workers";
 import {
   getOAuthStateCookie,
   clearOAuthStateCookie,
@@ -13,7 +14,6 @@ import {
 
 // GET /api/auth/callback - Handle GitHub OAuth callback
 export const GET: APIRoute = async ({ request, locals }) => {
-  const runtime = locals.runtime;
   const url = new URL(request.url);
   const code = url.searchParams.get("code");
   const state = url.searchParams.get("state");
@@ -50,8 +50,8 @@ export const GET: APIRoute = async ({ request, locals }) => {
   try {
     // Exchange code for token
     const auth = createOAuthUserAuth({
-      clientId: runtime.env.GITHUB_CLIENT_ID,
-      clientSecret: runtime.env.GITHUB_CLIENT_SECRET,
+      clientId: env.GITHUB_CLIENT_ID,
+      clientSecret: env.GITHUB_CLIENT_SECRET,
       code,
     });
 
@@ -64,7 +64,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
     console.log(`OAuth successful for user: ${user.login}`);
 
     // Store token in database
-    const db = drizzle(runtime.env.DB);
+    const db = drizzle(env.DB);
     const database = setupDatabase(db);
 
     const expiresAt =
@@ -88,7 +88,7 @@ export const GET: APIRoute = async ({ request, locals }) => {
     console.log(`Token stored for user: ${user.login}`);
 
     // Set auth cookie, clear state/return_to cookies, and redirect to return_to
-    const authCookie = await setAuthCookie(user.login, runtime.env.API_SECRET);
+    const authCookie = await setAuthCookie(user.login, env.API_SECRET);
     const headers = new Headers();
     const returnUrl = new URL(returnTo, url.origin);
     returnUrl.searchParams.set("login", "success");

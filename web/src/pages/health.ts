@@ -5,6 +5,7 @@ import { setupDatabase } from "../../../src/database";
 import { getMigrationStatus } from "../../../src/migrations";
 import { jsonResponse } from "../lib/api";
 
+import { env } from "cloudflare:workers";
 interface HealthCheck {
   name: string;
   status: "healthy" | "unhealthy";
@@ -47,17 +48,16 @@ async function checkDatabase(
 
 // GET /health - Health check with D1 connectivity verification
 export const GET: APIRoute = async ({ locals }) => {
-  const runtime = locals.runtime;
   const checks: HealthCheck[] = [];
 
   // Check token database (DB)
-  const tokenDbCheck = await checkDatabase("token_db", runtime.env.DB);
+  const tokenDbCheck = await checkDatabase("token_db", env.DB);
   checks.push(tokenDbCheck);
 
   // Check analytics database (ANALYTICS_DB)
   const analyticsDbCheck = await checkDatabase(
     "analytics_db",
-    runtime.env.ANALYTICS_DB,
+    env.ANALYTICS_DB,
   );
   checks.push(analyticsDbCheck);
 
@@ -68,7 +68,7 @@ export const GET: APIRoute = async ({ locals }) => {
 
   if (tokenDbCheck.status === "healthy") {
     try {
-      const db = drizzle(runtime.env.DB);
+      const db = drizzle(env.DB);
       const database = setupDatabase(db);
       tokenStats = await database.getTokenStats();
       const expiring = await database.getExpiringTokens();

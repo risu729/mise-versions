@@ -4,14 +4,13 @@ import { Octokit } from "@octokit/rest";
 import { setupDatabase } from "../../../../src/database";
 import { jsonResponse, errorResponse, requireApiAuth } from "../../lib/api";
 
+import { env } from "cloudflare:workers";
 // GET /api/rate-limits - Rate limit status across tokens (admin)
 export const GET: APIRoute = async ({ request, locals }) => {
-  const runtime = locals.runtime;
-
-  const authError = requireApiAuth(request, runtime.env.API_SECRET);
+  const authError = requireApiAuth(request, env.API_SECRET);
   if (authError) return authError;
 
-  const db = drizzle(runtime.env.DB);
+  const db = drizzle(env.DB);
   const database = setupDatabase(db);
 
   try {
