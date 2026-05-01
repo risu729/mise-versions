@@ -193,3 +193,4 @@
 "0.110.0" = { created_at = 2026-03-19T18:01:55.000Z, release_url = "https://github.com/anchore/grype/releases/tag/v0.110.0" }
 "0.111.0" = { created_at = 2026-04-09T13:14:52.000Z, release_url = "https://github.com/anchore/grype/releases/tag/v0.111.0" }
 "0.111.1" = { created_at = 2026-04-22T17:16:02.000Z, release_url = "https://github.com/anchore/grype/releases/tag/v0.111.1" }
+"0.112.0" = { created_at = 2026-05-01T19:30:25.827Z }
