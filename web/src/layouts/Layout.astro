@@ -2,6 +2,7 @@
 import { AuthButton } from '../components/AuthButton';
 import { AdminButton } from '../components/AdminButton';
 import { MAUCounter } from '../components/MAUCounter';
+import '../index.css';
 
 interface Props {
   title?: string;
@@ -114,10 +115,6 @@ const currentPath = Astro.url.pathname;
 </html>
 
 <style is:global>
-  @tailwind base;
-  @tailwind components;
-  @tailwind utilities;
-
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
       Ubuntu, Cantarell, sans-serif;
