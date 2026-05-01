@@ -43,7 +43,7 @@ export const GET: APIRoute = async ({ request, params, locals }) => {
       if (versions === null) {
         versions = await loadVersionRows(db, tool);
         if (versions !== null) {
-          runtime.ctx.waitUntil(
+          locals.cfContext.waitUntil(
             putCachedVersionRows(env.DOWNLOAD_DEDUPE, tool, {}, versions),
           );
         }
@@ -55,7 +55,7 @@ export const GET: APIRoute = async ({ request, params, locals }) => {
         });
       }
       toml = versionsToToml(versions);
-      runtime.ctx.waitUntil(
+      locals.cfContext.waitUntil(
         putCachedText(request, ":toml", toml, "text/plain; charset=utf-8"),
       );
     }
@@ -64,7 +64,7 @@ export const GET: APIRoute = async ({ request, params, locals }) => {
     const clientIP = getClientIP(request);
     const miseVersion = getMiseVersionFromHeaders(request.headers);
     const isCI = request.headers.get("x-mise-ci") === "true";
-    runtime.ctx.waitUntil(
+    locals.cfContext.waitUntil(
       hashIP(clientIP, env.API_SECRET).then(async (ipHash) => {
         try {
           // Always emit telemetry (includes is_ci flag for analysis)

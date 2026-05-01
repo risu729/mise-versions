@@ -40,7 +40,7 @@ export const GET: APIRoute = async ({ params, request, locals }) => {
     const analytics = setupAnalytics(db);
 
     const data = await analytics.getVersionTrends(tool, days);
-    runtime.ctx.waitUntil(
+    locals.cfContext.waitUntil(
       putCachedJson(
         env.DOWNLOAD_DEDUPE,
         cacheKey,

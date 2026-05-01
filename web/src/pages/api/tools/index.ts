@@ -50,7 +50,7 @@ export const GET: APIRoute = async ({ url, locals }) => {
       sort,
       backends,
     });
-    runtime.ctx.waitUntil(
+    locals.cfContext.waitUntil(
       putCachedJson(
         env.DOWNLOAD_DEDUPE,
         cacheKey,

@@ -53,7 +53,7 @@ export const GET: APIRoute = async ({ request, params, locals }) => {
     if (versions === null) {
       versions = await loadVersionRows(db, tool, options);
       if (versions !== null) {
-        runtime.ctx.waitUntil(
+        locals.cfContext.waitUntil(
           putCachedVersionRows(env.DOWNLOAD_DEDUPE, tool, options, versions),
         );
       }
@@ -66,7 +66,7 @@ export const GET: APIRoute = async ({ request, params, locals }) => {
     }
 
     const text = versionsToText(versions);
-    runtime.ctx.waitUntil(
+    locals.cfContext.waitUntil(
       putCachedText(request, ":text", text, "text/plain; charset=utf-8"),
     );
 

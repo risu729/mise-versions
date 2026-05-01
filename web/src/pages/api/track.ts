@@ -48,7 +48,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const miseVersion = getMiseVersionFromHeaders(request.headers);
 
     // Always emit telemetry (includes is_ci flag for analysis)
-    runtime.ctx.waitUntil(
+    locals.cfContext.waitUntil(
       emitTelemetry(env, {
         schema_version: 1,
         type: "download",
