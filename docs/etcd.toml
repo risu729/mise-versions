@@ -277,3 +277,5 @@
 "3.4.43" = { created_at = 2026-04-01T18:18:40.000Z, release_url = "https://github.com/etcd-io/etcd/releases/tag/v3.4.43" }
 "3.5.29" = { created_at = 2026-04-01T18:25:00.000Z, release_url = "https://github.com/etcd-io/etcd/releases/tag/v3.5.29" }
 "3.6.10" = { created_at = 2026-04-01T18:30:19.000Z, release_url = "https://github.com/etcd-io/etcd/releases/tag/v3.6.10" }
+"3.4.44" = { created_at = 2026-05-01T18:30:29.000Z, release_url = "https://github.com/etcd-io/etcd/releases/tag/v3.4.44" }
+"3.5.30" = { created_at = 2026-05-01T18:42:29.000Z, release_url = "https://github.com/etcd-io/etcd/releases/tag/v3.5.30" }
