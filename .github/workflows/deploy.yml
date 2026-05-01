@@ -36,3 +36,9 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+      - name: Run database migrations
+        run: node scripts/migrate.js run
+        env:
+          TOKEN_MANAGER_URL: https://mise-tools.jdx.dev
+          TOKEN_MANAGER_SECRET: ${{ secrets.TOKEN_MANAGER_SECRET }}

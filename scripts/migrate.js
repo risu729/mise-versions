@@ -4,10 +4,8 @@
  * Database Migration CLI
  *
  * Usage:
+ *   node scripts/migrate.js run       - Run migrations
  *   node scripts/migrate.js status    - Check migration status
- *
- * Note: Migrations run automatically on server start.
- * This script is mainly for checking status and monitoring.
  *
  * Environment Variables:
  *   TOKEN_MANAGER_URL      - URL of the token manager API
@@ -70,6 +68,23 @@ async function getMigrationStatus(baseUrl, secret) {
   return response.data;
 }
 
+async function runMigrations(baseUrl, secret) {
+  const response = await makeRequest(`${baseUrl}/api/admin/migrate`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${secret}`,
+    },
+  });
+
+  if (response.status !== 200) {
+    throw new Error(
+      `Failed to run migrations: ${response.status} ${response.data}`,
+    );
+  }
+
+  return response.data;
+}
+
 async function main() {
   const baseUrl = process.env.TOKEN_MANAGER_URL;
   const secret = process.env.TOKEN_MANAGER_SECRET;
@@ -83,7 +98,12 @@ async function main() {
   }
 
   try {
-    if (action === "status") {
+    if (action === "run") {
+      console.log("🚚 Running migrations...");
+
+      const result = await runMigrations(baseUrl, secret);
+      console.log(`✅ ${result.message || "Migrations completed"}`);
+    } else if (action === "status") {
       console.log("📊 Checking migration status...");
 
       const status = await getMigrationStatus(baseUrl, secret);
@@ -113,8 +133,7 @@ async function main() {
         console.log("\n✅ All migrations are up to date!");
       }
     } else {
-      console.error("❌ Unknown action. Available actions: status");
-      console.error("   Note: Migrations run automatically on server start");
+      console.error("❌ Unknown action. Available actions: run, status");
       process.exit(1);
     }
   } catch (error) {
