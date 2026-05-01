@@ -467,11 +467,61 @@ export function createTrendsFunctions(db: ReturnType<typeof drizzle>) {
         version_count: number;
       }>
     > {
+      const summaryRows = await db.all<{
+        name: string;
+        downloads_30d: number;
+        trending_score: number;
+        daily_boost: number;
+        sparkline: string;
+        description: string | null;
+        backends: string | null;
+        security: string | null;
+        version_count: number | null;
+      }>(sql`
+	        SELECT
+	          t.name,
+	          s.downloads_30d,
+	          s.trending_score,
+	          s.daily_boost,
+	          s.sparkline,
+	          t.description,
+	          t.backends,
+	          t.security,
+	          t.version_count
+	        FROM trending_tool_summaries s
+	        INNER JOIN tools t ON s.tool_id = t.id
+	        WHERE t.latest_version IS NOT NULL
+	        ORDER BY s.trending_score DESC
+	        LIMIT ${limit}
+	      `);
+
+      if (summaryRows.length > 0) {
+        return summaryRows.map((row) => ({
+          name: row.name,
+          downloads_30d: row.downloads_30d,
+          trendingScore: row.trending_score,
+          dailyBoost: row.daily_boost,
+          sparkline: JSON.parse(row.sparkline),
+          description: row.description || undefined,
+          backends: row.backends ? JSON.parse(row.backends) : undefined,
+          security: row.security ? JSON.parse(row.security) : undefined,
+          version_count: row.version_count || 0,
+        }));
+      }
+
       const now = Math.floor(Date.now() / 1000);
       const thirtyDaysAgo = new Date((now - 30 * 86400) * 1000)
         .toISOString()
         .split("T")[0];
       const today = new Date(now * 1000).toISOString().split("T")[0];
+      const lookupDates = Array.from(
+        { length: 30 },
+        (_, index) =>
+          new Date((now - (index + 1) * 86400) * 1000)
+            .toISOString()
+            .split("T")[0],
+      );
+      const sparklineDates = lookupDates.slice(0, 13).reverse();
 
       const dailyData = await db
         .select({
@@ -486,6 +536,7 @@ export function createTrendsFunctions(db: ReturnType<typeof drizzle>) {
           and(
             sql`${dailyToolStats.date} >= ${thirtyDaysAgo}`,
             sql`${dailyToolStats.date} < ${today}`,
+            sql`tools.latest_version IS NOT NULL`,
           ),
         )
         .orderBy(dailyToolStats.date)
@@ -519,22 +570,14 @@ export function createTrendsFunctions(db: ReturnType<typeof drizzle>) {
       }> = [];
 
       for (const [name, data] of toolData) {
-        const sparkline: number[] = [];
-        for (let i = 13; i >= 1; i--) {
-          const date = new Date((now - i * 86400) * 1000)
-            .toISOString()
-            .split("T")[0];
-          sparkline.push(data.daily.get(date) ?? 0);
-        }
+        const sparkline = sparklineDates.map(
+          (date) => data.daily.get(date) ?? 0,
+        );
 
         // Collect daily values for the 30-day window
-        const dailyValues: number[] = [];
-        for (let i = 1; i <= 30; i++) {
-          const date = new Date((now - i * 86400) * 1000)
-            .toISOString()
-            .split("T")[0];
-          dailyValues.push(data.daily.get(date) ?? 0);
-        }
+        const dailyValues = lookupDates.map(
+          (date) => data.daily.get(date) ?? 0,
+        );
 
         // Compute mean and standard deviation over the full 30 days
         const mean =
