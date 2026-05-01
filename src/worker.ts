@@ -19,17 +19,13 @@ let migrationsCompleted = false;
 async function ensureMigrations(env: Env): Promise<void> {
   if (migrationsCompleted) return;
 
-  try {
-    const db = drizzle(env.DB);
-    await runMigrations(db);
+  const db = drizzle(env.DB);
+  await runMigrations(db);
 
-    const analyticsDb = drizzle(env.ANALYTICS_DB);
-    await runAnalyticsMigrations(analyticsDb);
+  const analyticsDb = drizzle(env.ANALYTICS_DB);
+  await runAnalyticsMigrations(analyticsDb);
 
-    migrationsCompleted = true;
-  } catch (error) {
-    console.error("Migration error:", error);
-  }
+  migrationsCompleted = true;
 }
 
 // Re-export the Astro worker's fetch handler
