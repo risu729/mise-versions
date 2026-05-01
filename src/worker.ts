@@ -14,30 +14,9 @@ interface Env {
   [key: string]: unknown;
 }
 
-let migrationsCompleted = false;
-
-async function ensureMigrations(env: Env): Promise<void> {
-  if (migrationsCompleted) return;
-
-  const db = drizzle(env.DB);
-  await runMigrations(db);
-
-  const analyticsDb = drizzle(env.ANALYTICS_DB);
-  await runAnalyticsMigrations(analyticsDb);
-
-  migrationsCompleted = true;
-}
-
 // Re-export the Astro worker's fetch handler
 export default {
-  async fetch(
-    request: Request,
-    env: Env,
-    ctx: ExecutionContext,
-  ): Promise<Response> {
-    await ensureMigrations(env);
-    return astroWorker.fetch(request, env, ctx);
-  },
+  fetch: astroWorker.fetch,
   scheduled,
 };
 
