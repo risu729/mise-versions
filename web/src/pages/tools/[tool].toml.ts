@@ -64,8 +64,8 @@ export const GET: APIRoute = async ({ request, params, locals }) => {
     const clientIP = getClientIP(request);
     const miseVersion = getMiseVersionFromHeaders(request.headers);
     const isCI = request.headers.get("x-mise-ci") === "true";
-    runtime.ctx.waitUntil(
-      hashIP(clientIP, runtime.env.API_SECRET).then(async (ipHash) => {
+    const trackRequest = hashIP(clientIP, runtime.env.API_SECRET)
+      .then(async (ipHash) => {
         try {
           // Always emit telemetry (includes is_ci flag for analysis)
           await emitTelemetry(runtime.env, {
@@ -86,8 +86,15 @@ export const GET: APIRoute = async ({ request, params, locals }) => {
         } catch (e) {
           console.error("Failed to track version request:", e);
         }
-      }),
-    );
+      })
+      .catch((e) => {
+        console.error("Failed to prepare version request tracking:", e);
+      });
+    try {
+      runtime.ctx?.waitUntil?.(trackRequest);
+    } catch (e) {
+      console.error("Failed to schedule version request tracking:", e);
+    }
 
     // Generate TOML output
     const lines = ["[versions]"];
