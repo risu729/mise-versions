@@ -654,6 +654,82 @@ export function createRollupFunctions(db: ReturnType<typeof drizzle>) {
     return countSummaryRows(d1);
   }
 
+  async function populateBackendToolSummaries(
+    d1?: D1Database,
+  ): Promise<{ backendSummaries: number }> {
+    const updatedAt = new Date().toISOString();
+
+    await runStatement(
+      sql`
+        INSERT OR REPLACE INTO backend_tool_summaries (
+          backend_type,
+          tool_count,
+          updated_at
+        )
+        SELECT
+          SUBSTR(value, 1, INSTR(value || ':', ':') - 1) AS backend_type,
+          COUNT(DISTINCT tools.id) AS tool_count,
+          ${updatedAt}
+        FROM tools, json_each(backends)
+        WHERE latest_version IS NOT NULL
+          AND backends IS NOT NULL
+        GROUP BY backend_type
+      `,
+      d1,
+      `
+        INSERT OR REPLACE INTO backend_tool_summaries (
+          backend_type,
+          tool_count,
+          updated_at
+        )
+        SELECT
+          SUBSTR(value, 1, INSTR(value || ':', ':') - 1) AS backend_type,
+          COUNT(DISTINCT tools.id) AS tool_count,
+          ?
+        FROM tools, json_each(backends)
+        WHERE latest_version IS NOT NULL
+          AND backends IS NOT NULL
+        GROUP BY backend_type
+      `,
+      [updatedAt],
+    );
+
+    const refreshed = d1
+      ? await d1
+          .prepare(
+            "SELECT COUNT(*) AS count FROM backend_tool_summaries WHERE updated_at = ?",
+          )
+          .bind(updatedAt)
+          .first<{ count: number }>()
+      : await db.get<{ count: number }>(sql`
+          SELECT COUNT(*) AS count
+          FROM backend_tool_summaries
+          WHERE updated_at = ${updatedAt}
+        `);
+
+    if ((refreshed?.count ?? 0) > 0) {
+      await runStatement(
+        sql`
+          DELETE FROM backend_tool_summaries
+          WHERE updated_at != ${updatedAt}
+        `,
+        d1,
+        "DELETE FROM backend_tool_summaries WHERE updated_at != ?",
+        [updatedAt],
+      );
+    }
+
+    const total = d1
+      ? await d1
+          .prepare("SELECT COUNT(*) AS count FROM backend_tool_summaries")
+          .first<{ count: number }>()
+      : await db.get<{ count: number }>(
+          sql`SELECT COUNT(*) AS count FROM backend_tool_summaries`,
+        );
+
+    return { backendSummaries: total?.count ?? 0 };
+  }
+
   async function populateTrendingToolSummaries(
     d1?: D1Database,
   ): Promise<{ trendingSummaries: number }> {
@@ -675,56 +751,49 @@ export function createRollupFunctions(db: ReturnType<typeof drizzle>) {
     );
     const sparklineDates = lookupDates.slice(0, SPARKLINE_DAYS).reverse();
 
-    const candidates = await db
-      .select({
-        tool_id: dailyToolStats.tool_id,
-        downloads_30d: sql<number>`sum(${dailyToolStats.downloads})`,
-      })
-      .from(dailyToolStats)
-      .innerJoin(tools, eq(dailyToolStats.tool_id, tools.id))
-      .where(
-        and(
-          sql`${dailyToolStats.date} >= ${thirtyDaysAgo}`,
-          sql`${dailyToolStats.date} < ${today}`,
-          sql`tools.latest_version IS NOT NULL`,
-        ),
+    const dailyData = await db.all<{
+      tool_id: number;
+      downloads_30d: number;
+      date: string;
+      downloads: number;
+    }>(sql`
+      WITH candidates AS (
+        SELECT
+          daily_tool_stats.tool_id,
+          SUM(daily_tool_stats.downloads) AS downloads_30d
+        FROM daily_tool_stats
+          INNER JOIN tools ON daily_tool_stats.tool_id = tools.id
+        WHERE
+          daily_tool_stats.date >= ${thirtyDaysAgo}
+          AND daily_tool_stats.date < ${today}
+          AND tools.latest_version IS NOT NULL
+        GROUP BY daily_tool_stats.tool_id
+        HAVING SUM(daily_tool_stats.downloads) >= ${MIN_DOWNLOADS}
       )
-      .groupBy(dailyToolStats.tool_id)
-      .having(sql`sum(${dailyToolStats.downloads}) >= ${MIN_DOWNLOADS}`)
-      .all();
-    const candidateIds = candidates.map((row) => row.tool_id);
-
-    const dailyData =
-      candidateIds.length === 0
-        ? []
-        : await db
-            .select({
-              tool_id: dailyToolStats.tool_id,
-              date: dailyToolStats.date,
-              downloads: dailyToolStats.downloads,
-            })
-            .from(dailyToolStats)
-            .where(
-              and(
-                sql`${dailyToolStats.tool_id} IN (${sql.join(
-                  candidateIds,
-                  sql`, `,
-                )})`,
-                sql`${dailyToolStats.date} >= ${thirtyDaysAgo}`,
-                sql`${dailyToolStats.date} < ${today}`,
-              ),
-            )
-            .orderBy(dailyToolStats.date)
-            .all();
+      SELECT
+        daily_tool_stats.tool_id,
+        candidates.downloads_30d,
+        daily_tool_stats.date,
+        daily_tool_stats.downloads
+      FROM daily_tool_stats
+        INNER JOIN candidates ON daily_tool_stats.tool_id = candidates.tool_id
+      WHERE
+        daily_tool_stats.date >= ${thirtyDaysAgo}
+        AND daily_tool_stats.date < ${today}
+      ORDER BY daily_tool_stats.date
+    `);
 
     const toolData = new Map<
       number,
       { total: number; daily: Map<string, number> }
     >();
-    for (const row of candidates) {
-      toolData.set(row.tool_id, { total: row.downloads_30d, daily: new Map() });
-    }
     for (const row of dailyData) {
+      if (!toolData.has(row.tool_id)) {
+        toolData.set(row.tool_id, {
+          total: row.downloads_30d,
+          daily: new Map(),
+        });
+      }
       const data = toolData.get(row.tool_id)!;
       data.daily.set(row.date, row.downloads);
     }
@@ -769,22 +838,22 @@ export function createRollupFunctions(db: ReturnType<typeof drizzle>) {
       const BATCH_SIZE = 100;
       for (let i = 0; i < rows.length; i += BATCH_SIZE) {
         const batch = rows.slice(i, i + BATCH_SIZE);
-        const placeholders = batch.map(() => "(?, ?, ?, ?, ?, ?)").join(", ");
-        await d1
-          .prepare(
-            `INSERT OR REPLACE INTO trending_tool_summaries (tool_id, downloads_30d, daily_boost, trending_score, sparkline, updated_at) VALUES ${placeholders}`,
-          )
-          .bind(
-            ...batch.flatMap((row) => [
-              row.tool_id,
-              row.downloads_30d,
-              row.daily_boost,
-              row.trending_score,
-              row.sparkline,
-              updatedAt,
-            ]),
-          )
-          .run();
+        await d1.batch(
+          batch.map((row) =>
+            d1
+              .prepare(
+                "INSERT OR REPLACE INTO trending_tool_summaries (tool_id, downloads_30d, daily_boost, trending_score, sparkline, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
+              )
+              .bind(
+                row.tool_id,
+                row.downloads_30d,
+                row.daily_boost,
+                row.trending_score,
+                row.sparkline,
+                updatedAt,
+              ),
+          ),
+        );
       }
       if (rows.length > 0) {
         await d1
@@ -840,6 +909,7 @@ export function createRollupFunctions(db: ReturnType<typeof drizzle>) {
     populateDailyMauStats,
     backfillArchivedToolStats,
     populateToolDownloadSummaries,
+    populateBackendToolSummaries,
     populateTrendingToolSummaries,
 
     // Backfill rollup tables for the last N days (one-time migration)
@@ -875,6 +945,7 @@ export function createRollupFunctions(db: ReturnType<typeof drizzle>) {
 
       const archived = await backfillArchivedToolStats(d1);
       await populateToolDownloadSummaries(d1);
+      await populateBackendToolSummaries(d1);
       await populateTrendingToolSummaries(d1);
 
       return {
