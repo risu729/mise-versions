@@ -12,7 +12,7 @@
     { "pattern": "mise-versions.jdx.dev", "custom_domain": true },
   ],
   "assets": {
-    "directory": "web/dist/client",
+    "directory": "web/dist",
   },
   "observability": {
     "enabled": true,
